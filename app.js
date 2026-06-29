@@ -2,7 +2,7 @@
    APPLICATION LOGIC - SƠ CỨU 115 PWA (v2.1)
    ========================================================================== */
 
-const APP_VERSION = '2.0.0';
+const APP_VERSION = '2.1.0';
 
 // Chặn Pinch-to-zoom và Double-tap-to-zoom để tối ưu nhấn màn hình tốc độ cao
 document.addEventListener('touchstart', function (event) {

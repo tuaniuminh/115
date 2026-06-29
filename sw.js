@@ -2,7 +2,7 @@
    SERVICE WORKER - SƠ CỨU 115 PWA (v2.0.0)
    ========================================================================== */
 
-const CACHE_NAME = 'caching-v2.0.0';
+const CACHE_NAME = 'caching-v2.1.0';
 
 // List of core files to cache for offline-first operation (v2.0.0)
 const ASSETS_TO_CACHE = [
