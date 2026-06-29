@@ -1,0 +1,9 @@
+# Local project summary
+project_summary.md
+
+# System files
+Thumbs.db
+.DS_Store
+*.log
+.agents/
+.gemini/
