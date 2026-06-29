@@ -1082,10 +1082,12 @@ h1, h2, h3, h4, h5, h6 {
 
 .app-footer {
   text-align: center;
-  padding: 20px 10px;
-  margin-bottom: var(--nav-height);
+  padding: 20px 10px 10px 10px;
+  margin-top: 40px;
+  margin-bottom: 0;
   font-size: 0.72rem;
   color: var(--text-muted);
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .app-footer p {
@@ -1321,4 +1323,17 @@ h1, h2, h3, h4, h5, h6 {
   border-top: 1px solid var(--border-color);
   animation: fadeIn var(--transition-normal);
 }
+
+/* Quiz Pack Card Hover Effects */
+.quiz-pack-card {
+  transition: all var(--transition-fast) ease-in-out;
+}
+
+.quiz-pack-card:hover {
+  border-color: var(--accent-teal) !important;
+  background: rgba(20, 184, 166, 0.08) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(20, 184, 166, 0.15);
+}
+
 

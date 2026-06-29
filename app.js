@@ -1,8 +1,8 @@
 /* ==========================================================================
-   APPLICATION LOGIC - SƠ CỨU 115 PWA (v2.1)
+   APPLICATION LOGIC - SƠ CỨU 115 PWA (v2.2)
    ========================================================================== */
 
-const APP_VERSION = '2.1.0';
+const APP_VERSION = '2.2.0';
 
 // Chặn Pinch-to-zoom và Double-tap-to-zoom để tối ưu nhấn màn hình tốc độ cao
 document.addEventListener('touchstart', function (event) {
@@ -27,6 +27,7 @@ let isMetronomePlaying = false;
 let metronomeBpm = 110; // Updated to match training standard of 110 BPM
 
 // Quiz State variables
+let currentPackId = '';
 let currentQuizIndex = 0;
 let quizScore = 0;
 let quizAnswered = false;
@@ -36,65 +37,226 @@ let currentEmergencyId = '';
 let currentStepIndex = 0;
 
 /* ==========================================================================
-   DATABASE: QUIZ DATA
+   DATABASE: MULTIPLE QUIZ PACKS (v2.2)
    ========================================================================== */
-const quizData = [
-  {
-    question: "Bạn phát hiện một người nằm bất động trên đường. Việc đầu tiên bạn cần làm theo đúng quy trình sơ cứu là gì?",
-    options: [
-      "Lập tức quỳ xuống ép tim CPR cho nạn nhân ngay.",
-      "Lay vai nạn nhân hỏi lớn và kiểm tra an toàn hiện trường xung quanh trước khi tiếp cận.",
-      "Đổ nước ấm vào miệng nạn nhân để kích thích tỉnh táo.",
-      "Cõng nạn nhân chạy đi tìm bệnh viện gần nhất."
-    ],
-    answer: 1,
-    explanation: "Đảm bảo an toàn hiện trường là nguyên tắc sống còn số 1 để tránh bạn cũng trở thành nạn nhân thứ hai (như điện giật, xe tông). Sau đó mới kiểm tra phản ứng của nạn nhân."
+const quizPacks = {
+  pack1: {
+    title: "Đề 1: Hồi sức & Đường thở",
+    desc: "Đánh giá phản xạ cấp cứu ngừng tuần hoàn (CPR), hóc dị vật (Heimlich) và đuối nước cứu hộ.",
+    questions: [
+      {
+        question: "Bạn phát hiện một người nằm bất động trên đường. Việc đầu tiên bạn cần làm theo đúng quy trình sơ cứu là gì?",
+        options: [
+          "Lập tức quỳ xuống ép tim CPR cho nạn nhân ngay.",
+          "Lay vai nạn nhân hỏi lớn và kiểm tra an toàn hiện trường xung quanh trước khi tiếp cận.",
+          "Đổ nước ấm vào miệng nạn nhân để kích thích tỉnh táo.",
+          "Cõng nạn nhân chạy đi tìm bệnh viện gần nhất."
+        ],
+        answer: 1,
+        explanation: "Đảm bảo an toàn hiện trường là nguyên tắc sống còn số 1 để tránh bạn cũng trở thành nạn nhân thứ hai (như điện giật, xe tông). Sau đó mới kiểm tra phản ứng của nạn nhân."
+      },
+      {
+        question: "Một người lớn đang ăn bỗng nhiên ôm cổ họng, mặt tím tái, không thể ho, nói hay thở được. Bạn nên thực hiện hành động nào?",
+        options: [
+          "Dùng tay thọc sâu vào cổ họng để móc dị vật ra.",
+          "Bắt nạn nhân uống thật nhiều nước để trôi dị vật xuống dạ dày.",
+          "Đứng sau lưng thực hiện thủ thuật Heimlich (giật bụng mạnh hướng vào trong và lên trên).",
+          "Cho nạn nhân nằm ngửa rồi đè lên bụng họ."
+        ],
+        answer: 2,
+        explanation: "Nạn nhân có dấu hiệu hóc dị vật hoàn toàn đường thở. Việc giật bụng bằng thủ thuật Heimlich tạo ra áp lực khí từ phổi đẩy ngược lên để tống dị vật ra ngoài. Móc tay mò mẫm có thể đẩy dị vật sâu hơn."
+      },
+      {
+        question: "Vị trí đặt tay chính xác khi ép tim ngoài lồng ngực (CPR) cho người lớn là ở đâu?",
+        options: [
+          "Phía trên vùng ngực trái ngay sát tim.",
+          "Nửa dưới của xương ức (khoảng giữa hai núm vú trên ngực).",
+          "Vùng bụng trên rốn.",
+          "Trên xương đòn vai trái."
+        ],
+        answer: 1,
+        explanation: "Ép vào nửa dưới xương ức giúp ép trực tiếp quả tim nằm bên dưới lồng ngực vào cột sống, tạo ra lực đẩy máu tuần hoàn đi nuôi cơ thể. Ép lệch sang ngực trái có thể làm gãy xương sườn."
+      },
+      {
+        question: "Khi thực hiện thổi ngạt cấp cứu cho nạn nhân đuối nước ngừng thở, bạn cần làm gì đầu tiên?",
+        options: [
+          "Dốc ngược nạn nhân lên vai chạy xốc nước trước.",
+          "Bóp miệng nạn nhân và đổ nước muối sinh lý vào phế quản.",
+          "Ngửa đầu nâng cằm nạn nhân và móc sạch bùn đất đờm nhớt trong khoang miệng ra.",
+          "Thổi trực tiếp vào mũi nạn nhân khi miệng vẫn mở."
+        ],
+        answer: 2,
+        explanation: "Ngửa đầu nâng cằm giúp thông thoáng đường thở. Móc sạch dị vật (bùn đất, rong rêu) để dòng khí thổi vào phổi không bị bít tắc."
+      },
+      {
+        question: "Tần số ép tim chuẩn y khoa khi hồi sức tim phổi (CPR) cho người lớn là bao nhiêu lần/phút?",
+        options: [
+          "60 - 80 lần/phút.",
+          "80 - 100 lần/phút.",
+          "100 - 120 lần/phút.",
+          "130 - 150 lần/phút."
+        ],
+        answer: 2,
+        explanation: "Tần số ép tim chuẩn khuyến cáo là 100-120 lần/phút (nhịp metronome 110 BPM của ứng dụng nằm chính giữa khoảng này) giúp duy trì cung lượng tuần hoàn nhân tạo tối ưu."
+      }
+    ]
   },
-  {
-    question: "Một người lớn đang ăn bỗng nhiên ôm cổ họng, mặt tím tái, không thể ho, nói hay thở được. Bạn nên thực hiện hành động nào?",
-    options: [
-      "Dùng tay thọc sâu vào cổ họng để móc dị vật ra.",
-      "Bắt nạn nhân uống thật nhiều nước để trôi dị vật xuống dạ dày.",
-      "Đứng sau lưng thực hiện thủ thuật Heimlich (giật bụng mạnh hướng vào trong và lên trên).",
-      "Cho nạn nhân nằm ngửa rồi đè lên bụng họ."
-    ],
-    answer: 2,
-    explanation: "Nạn nhân có dấu hiệu hóc dị vật hoàn toàn đường thở. Việc giật bụng bằng thủ thuật Heimlich tạo ra áp lực khí từ phổi đẩy ngược lên để tống dị vật ra ngoài. Móc tay mò mẫm có thể đẩy dị vật sâu hơn."
+  pack2: {
+    title: "Đề 2: Chấn thương & Tai nạn",
+    desc: "Kiểm tra kỹ năng sơ cứu chảy máu, bỏng nhiệt/hóa chất, gãy xương và động vật độc cắn ngoài đời thực.",
+    questions: [
+      {
+        question: "Khi sơ cứu một vết bỏng nước sôi tại nhà, điều nào sau đây là SAI và NGUY HIỂM?",
+        options: [
+          "Xả nước mát sạch chảy nhẹ lên vết bỏng 15-20 phút.",
+          "Bôi kem đánh răng hoặc mỡ trăn trực tiếp lên vết bỏng để làm dịu da.",
+          "Cởi bỏ trang sức nhẹ nhàng ở chi bị bỏng trước khi nó sưng nề.",
+          "Bọc lỏng vết bỏng bằng màng bọc thực phẩm sạch."
+        ],
+        answer: 1,
+        explanation: "Bôi kem đánh răng, mỡ trăn hay các bài thuốc dân gian làm bịt kín nhiệt lượng dưới da, giữ vi khuẩn lại gây nhiễm trùng nghiêm trọng và làm vết bỏng ăn sâu thêm."
+      },
+      {
+        question: "Nếu có máu phun mạnh thành tia đỏ tươi từ chi bị dập nát mà băng ép trực tiếp không cầm được, bạn cần xử lý thế nào?",
+        options: [
+          "Đắp thuốc bột lá cây giã nhỏ trực tiếp lên vết thương.",
+          "Quấn băng ga-rô cách vết thương 5-7 cm về phía tim và ghi mốc thời gian lại.",
+          "Nới lỏng vết thương và xoa bóp cơ chi.",
+          "Dùng cồn 90 độ dội trực tiếp vào vòi phun máu."
+        ],
+        answer: 1,
+        explanation: "Máu phun thành tia đỏ tươi là dấu hiệu tổn thương động mạch lớn. Nếu băng ép thất bại, quấn garo cách vết thương 5-7cm hướng về tim là biện pháp sống còn ngăn mất máu cấp."
+      },
+      {
+        question: "Khi sơ cứu nạn nhân bị gãy hở xương cẳng chân (đầu xương lòi ra ngoài da), hành động nào sau đây là CẤM KỴ?",
+        options: [
+          "Băng ép lỏng để cầm máu bên ngoài đầu xương.",
+          "Cố gắng ấn hoặc đẩy đầu xương gãy chui trở lại vào trong da.",
+          "Đặt nẹp tre cố định chi vượt qua cả khớp gối và khớp cổ chân.",
+          "Chườm đá lạnh bọc trong khăn sạch xung quanh vùng sưng nề."
+        ],
+        answer: 1,
+        explanation: "Tuyệt đối không đẩy đầu xương gãy chui ngược vào trong. Đầu xương sắc nhọn dính đất cát bẩn sẽ đưa vi khuẩn uốn ván trực tiếp vào sâu trong máu gây nhiễm trùng tủy xương hoại tử."
+      },
+      {
+        question: "Sơ cứu chuẩn khi bị rắn độc cắn ở chân bao gồm thao tác nào?",
+        options: [
+          "Rạch rộng vết răng nanh và dùng miệng hút nọc độc ra.",
+          "Buộc garo thật chặt ở đùi để chặn máu lưu thông hoàn toàn.",
+          "Nằm bất động tuyệt đối, tháo trang sức và thực hiện băng ép bất động (PIT) từ bàn chân lên.",
+          "Chườm đá lạnh trực tiếp lên vết cắn và bắt nạn nhân đi lại tìm người giúp đỡ."
+        ],
+        answer: 2,
+        explanation: "Băng ép bất động (PIT) vừa phải giúp làm chậm nọc độc di chuyển theo đường bạch huyết mà không làm tắc động mạch nuôi chi. Rạch da gây chảy máu không cầm và nhiễm trùng sâu."
+      },
+      {
+        question: "Thời gian ngâm/xả nước mát sạch tối ưu cho vết bỏng nhiệt thông thường là bao lâu?",
+        options: [
+          "1 - 2 phút.",
+          "5 - 10 phút.",
+          "15 - 20 phút.",
+          "45 - 60 phút."
+        ],
+        answer: 2,
+        explanation: "Thời gian xả nước mát tối ưu là 15-20 phút giúp làm mát các lớp da sâu dưới da, ngăn cản nhiệt lượng lan tỏa dập tắt tế bào mô, đồng thời làm giảm đau đớn tức thì."
+      }
+    ]
   },
-  {
-    question: "Vị trí đặt tay chính xác khi ép tim ngoài lồng ngực (CPR) cho người lớn là ở đâu?",
-    options: [
-      "Phía trên vùng ngực trái ngay sát tim.",
-      "Nửa dưới của xương ức (khoảng giữa hai núm vú trên ngực).",
-      "Vùng bụng trên rốn.",
-      "Trên xương đòn vai trái."
-    ],
-    answer: 1,
-    explanation: "Ép vào nửa dưới xương ức giúp ép trực tiếp quả tim nằm bên dưới lồng ngực vào cột sống, tạo ra lực đẩy máu tuần hoàn đi nuôi cơ thể. Ép lệch sang ngực trái có thể làm gãy xương sườn."
-  },
-  {
-    question: "Khi sơ cứu một vết bỏng nước sôi tại nhà, điều nào sau đây là SAI và NGUY HIỂM?",
-    options: [
-      "Xả nước mát sạch chảy nhẹ lên vết bỏng 15-20 phút.",
-      "Bôi kem đánh răng hoặc mỡ trăn trực tiếp lên vết bỏng để làm dịu da.",
-      "Cởi bỏ trang sức nhẹ nhàng ở chi bị bỏng trước khi nó sưng nề.",
-      "Bọc lỏng vết bỏng bằng màng bọc thực phẩm sạch."
-    ],
-    answer: 1,
-    explanation: "Bôi kem đánh răng, mỡ trăn hay dầu hỏa làm bịt kín nhiệt lượng dưới da, giữ vi khuẩn lại gây nhiễm trùng nghiêm trọng và làm vết bỏng ăn sâu thêm."
-  },
-  {
-    question: "Một người đột nhiên bị méo miệng sang một bên, yếu liệt một bên cánh tay và nói ngọng ú ớ. Bạn cần làm gì?",
-    options: [
-      "Cho nằm nghỉ ngơi và cạo gió, chích máu đầu ngón tay.",
-      "Cho uống ngay một viên thuốc An Cung Ngưu Hoàng Hoàn.",
-      "Lập tức gọi cấp cứu 115 và ghi nhớ mốc thời gian xuất hiện triệu chứng.",
-      "Bắt nạn nhân đứng dậy đi bộ xem có giữ thăng bằng được không."
-    ],
-    answer: 2,
-    explanation: "Nạn nhân có triệu chứng đột quỵ chuẩn FAST. Thời gian là não. Cần gọi 115 đưa đến cơ sở y tế có điều trị tái thông cấp tốc. Tuyệt đối không cho uống thuốc/ăn uống vì nguy cơ sặc phổi rất cao."
+  pack3: {
+    title: "Đề 3: Cấp cứu tổng hợp",
+    desc: "Bài kiểm tra tổng hợp bao quát tất cả 8 tình huống cấp cứu và dấu hiệu lâm sàng (FAST đột quỵ, chấn thương sọ não, phù phổi,...)",
+    questions: [
+      {
+        question: "Những dấu hiệu nhận biết nhanh một người đang bị Đột quỵ (Stroke) theo quy tắc FAST là gì?",
+        options: [
+          "Đau bụng dữ dội, nôn mửa, sốt cao đột ngột.",
+          "Mặt méo lệch một bên khóe miệng, yếu liệt một bên tay chân, nói ngọng nói lắp ú ớ.",
+          "Đau mỏi vai gáy, ho khạc ra máu tươi.",
+          "Co giật toàn thân và sùi bọt mép trắng."
+        ],
+        answer: 1,
+        explanation: "Mặt lệch (Face), Yếu tay chân (Arms), Nói ngọng (Speech) là bộ ba dấu hiệu lâm sàng điển hình nhất của đột quỵ não cấp tính."
+      },
+      {
+        question: "Vì sao không được cho nạn nhân nghi ngờ đột quỵ uống thuốc hay ăn uống bất cứ thứ gì?",
+        options: [
+          "Vì thuốc đột quỵ rất đắt tiền.",
+          "Vì đột quỵ gây liệt cơ hầu họng, ăn uống sẽ bị sặc thẳng vào đường thở gây tắc nghẽn phổi cấp tính.",
+          "Vì thức ăn làm huyết áp giảm đột ngột.",
+          "Vì thức ăn phản ứng với nọc độc trong cơ thể."
+        ],
+        answer: 1,
+        explanation: "Khi đột quỵ, phản xạ nuốt bị liệt. Cho ăn uống rất dễ sặc vào đường hô hấp, gây tắc nghẽn phổi hoặc viêm phổi do sặc cực kỳ nguy hiểm."
+      },
+      {
+        question: "Tại sao không được cạo gió, chích máu đầu ngón tay cho người bị đột quỵ?",
+        options: [
+          "Vì gây mất nhiều máu cho nạn nhân.",
+          "Vì đau đớn do chích máu làm kích thích hệ thần kinh giao cảm khiến huyết áp vọt tăng cao, làm vỡ mạch máu não nặng hơn.",
+          "Vì cạo gió làm rách da vùng mặt.",
+          "Vì chích máu làm lây lan virut đột quỵ."
+        ],
+        answer: 1,
+        explanation: "Châm chích gây đau đớn làm tăng huyết áp của bệnh nhân (khiến xuất huyết não dữ dội hơn), đồng thời làm trễ mốc thời gian vàng cấp cứu (4.5 giờ) của bệnh viện."
+      },
+      {
+        question: "Trong sơ cứu đuối nước, hiện tượng sùi bọt hồng ở mũi và miệng nạn nhân báo hiệu điều gì?",
+        options: [
+          "Nạn nhân bị ngộ độc thực phẩm trước đó.",
+          "Nạn nhân đã chết lâm sàng hoàn toàn không thể cứu.",
+          "Hiện tượng phù phổi cấp (nước phá hủy chất surfactant làm tràn dịch nang phổi).",
+          "Nạn nhân bị động kinh."
+        ],
+        answer: 2,
+        explanation: "Bọt hồng sùi ra báo hiệu phù phổi cấp nặng do tổn thương phế nang. Cần duy trì thông khí (thổi ngạt) và ép tim CPR liên tục để cung cấp oxy phục hồi nang phổi."
+      },
+      {
+        question: "Tại sao việc quấn băng garo bóp nghẹt động mạch đùi khi rắn cắn lại dễ dẫn đến hoại tử phải cưa chi?",
+        options: [
+          "Vì nọc rắn tập trung ở đùi đục thủng xương.",
+          "Vì thắt quá chặt chặn dòng máu động mạch nuôi chi, tế bào cơ chi chết hoại tử do thiếu máu nuôi dưỡng kéo dài.",
+          "Vì garo phản ứng hóa học với nọc rắn.",
+          "Vì garo làm tăng huyết áp lên tim."
+        ],
+        answer: 1,
+        explanation: "Garo bóp nghẹt chặn hoàn toàn dòng máu tươi nuôi tế bào chi. Thiếu máu nuôi dưỡng trên 40-60 phút gây hoại tử thối rữa cơ chi, khi cởi ra độc tố tràn về gây suy thận cấp nên buộc phải cưa cụt chân để cứu mạng."
+      },
+      {
+        question: "Độ sâu khi ép tim ngoài lồng ngực (CPR) cho người trưởng thành là bao nhiêu?",
+        options: [
+          "Từ 2 đến 3 cm.",
+          "Từ 3 đến 4 cm.",
+          "Từ 5 đến 6 cm.",
+          "Từ 7 đến 8 cm."
+        ],
+        answer: 2,
+        explanation: "Độ sâu 5-6 cm y khoa đảm bảo ép quả tim xẹp xuống để tống máu đi, và lồng ngực phải nở ra hết sau mỗi nhịp để máu hút về tim đầy đủ."
+      },
+      {
+        question: "Xử lý sơ cứu ban đầu chuẩn xác nhất đối với bỏng hóa chất axit khô dính lên da tay là gì?",
+        options: [
+          "Lập tức xả vòi nước mát chảy mạnh để cuốn axit đi.",
+          "Dùng chổi hoặc bàn chải sạch quét/chải hết bột axit khô ra khỏi da, sau đó mới xả nước rửa nhiều.",
+          "Đắp chanh hoặc giấm ăn lên vết bỏng để trung hòa axit.",
+          "Dùng mỡ trăn thoa đều xoa bóp mạnh tay."
+        ],
+        answer: 1,
+        explanation: "Hóa chất khô gặp nước sẽ sinh nhiệt phản ứng bỏng nặng hơn. Cần quét sạch bột khô trước, sau đó rửa xả nước liên tục từ 30-45 phút để làm loãng lượng hóa chất còn lại."
+      },
+      {
+        question: "Khi thực hiện chu kỳ ép tim CPR 30:2, nếu không thể hoặc từ chối thực hiện thổi ngạt (hà hơi), bạn nên làm gì?",
+        options: [
+          "Dừng toàn bộ quá trình sơ cứu và đợi xe cấp cứu đến.",
+          "Chỉ cần ép tim liên tục không ngừng với tần số 100-120 lần/phút cho đến khi nhân viên y tế đến.",
+          "Đổ sữa hoặc nước ngọt vào miệng nạn nhân để bù năng lượng.",
+          "Vác nạn nhân lên chạy bộ vòng quanh."
+        ],
+        answer: 1,
+        explanation: "Nếu không thể thổi ngạt (không có mặt nạ bảo vệ, lo ngại lây nhiễm dịch cơ thể), việc chỉ ép tim liên tục (Hands-only CPR) vẫn cực kỳ hiệu quả để duy trì áp lực tưới máu não."
+      }
+    ]
   }
-];
+};
 
 /* ==========================================================================
    DATABASE: DETAILED CLINICAL EMERGENCY GUIDES (8 SITUATIONS)
@@ -826,9 +988,50 @@ function toggleStepperMetronome() {
 }
 
 /* ==========================================================================
-   TAB 3: INTERACTIVE QUIZ ENGINE
+   TAB 3: INTERACTIVE QUIZ ENGINE WITH DE-PRACTICE SELECTOR (v2.2)
    ========================================================================== */
+function displayQuizPacks() {
+  const container = document.getElementById('quiz-container');
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="quiz-progress" style="margin-bottom:12px;">Đề thi trắc nghiệm</div>
+    <div class="quiz-question" style="font-size: 1.1rem; text-align: center; margin-bottom: 20px;">Chọn đề luyện tập phù hợp</div>
+    <div class="quiz-packs-list" style="display: flex; flex-direction: column; gap: 12px;">
+      ${Object.entries(quizPacks).map(([id, pack]) => `
+        <div class="quiz-pack-card" onclick="selectQuizPack('${id}')" style="background: rgba(30, 41, 59, 0.4); border: 1px solid var(--border-color); border-radius: var(--border-radius-md); padding: 14px 16px; cursor: pointer; text-align: left;">
+          <h4 style="color: var(--accent-teal); font-size: 1rem; font-weight:700; margin-bottom:4px;">${pack.title}</h4>
+          <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">${pack.desc}</p>
+          <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 6px; font-weight:600;">Số câu hỏi: ${pack.questions.length} câu</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function selectQuizPack(packId) {
+  currentPackId = packId;
+  currentQuizIndex = 0;
+  quizScore = 0;
+  
+  const container = document.getElementById('quiz-container');
+  container.innerHTML = `
+    <div class="quiz-progress" id="quiz-progress">Câu hỏi 1/5</div>
+    <div class="quiz-question" id="quiz-question">Đang tải câu hỏi...</div>
+    <div class="quiz-options" id="quiz-options"></div>
+    <div class="quiz-explanation" id="quiz-explanation"></div>
+    <button class="action-btn" id="quiz-next-btn" style="display: none;" onclick="nextQuizQuestion()">Câu tiếp theo</button>
+  `;
+  
+  loadQuizQuestion();
+}
+
 function loadQuizQuestion() {
+  if (!currentPackId) {
+    displayQuizPacks();
+    return;
+  }
+
   const questionEl = document.getElementById('quiz-question');
   const optionsEl = document.getElementById('quiz-options');
   const explanationEl = document.getElementById('quiz-explanation');
@@ -837,9 +1040,10 @@ function loadQuizQuestion() {
 
   if (!questionEl) return;
 
-  const questionData = quizData[currentQuizIndex];
+  const pack = quizPacks[currentPackId];
+  const questionData = pack.questions[currentQuizIndex];
   
-  progressEl.textContent = `Câu hỏi ${currentQuizIndex + 1} / ${quizData.length}`;
+  progressEl.textContent = `${pack.title} - Câu ${currentQuizIndex + 1} / ${pack.questions.length}`;
   questionEl.textContent = questionData.question;
   optionsEl.innerHTML = '';
   explanationEl.style.display = 'none';
@@ -856,24 +1060,23 @@ function loadQuizQuestion() {
 }
 
 function handleQuizAnswer(selectedIndex, selectedBtn) {
-  if (quizAnswered) return; // Answer locked
+  if (quizAnswered) return;
   
   quizAnswered = true;
-  const questionData = quizData[currentQuizIndex];
+  const pack = quizPacks[currentPackId];
+  const questionData = pack.questions[currentQuizIndex];
   const options = document.querySelectorAll('.quiz-option');
   const explanationEl = document.getElementById('quiz-explanation');
   const nextBtn = document.getElementById('quiz-next-btn');
 
-  // Check correct option
   if (selectedIndex === questionData.answer) {
     selectedBtn.classList.add('correct');
     quizScore++;
   } else {
     selectedBtn.classList.add('incorrect');
-    options[questionData.answer].classList.add('correct'); // Highlight correct answer
+    options[questionData.answer].classList.add('correct');
   }
 
-  // Display explanation text
   explanationEl.textContent = questionData.explanation;
   explanationEl.style.display = 'block';
   
@@ -881,22 +1084,23 @@ function handleQuizAnswer(selectedIndex, selectedBtn) {
 }
 
 function nextQuizQuestion() {
-  if (currentQuizIndex < quizData.length - 1) {
+  const pack = quizPacks[currentPackId];
+  if (currentQuizIndex < pack.questions.length - 1) {
     currentQuizIndex++;
     loadQuizQuestion();
   } else {
-    // End of quiz
     displayQuizResult();
   }
 }
 
 function displayQuizResult() {
   const container = document.getElementById('quiz-container');
+  const pack = quizPacks[currentPackId];
   let rating = "";
   
-  if (quizScore === quizData.length) {
+  if (quizScore === pack.questions.length) {
     rating = "Bác sĩ thực thụ! 🩺 Bạn đã nắm vững lý thuyết.";
-  } else if (quizScore >= 3) {
+  } else if (quizScore >= Math.floor(pack.questions.length * 0.7)) {
     rating = "Khá tốt! 🩹 Bạn đã có kỹ năng cơ bản để ứng cứu.";
   } else {
     rating = "Cần ôn tập lại! 📚 Hãy đọc thêm phần Lý thuyết để nắm chắc hơn.";
@@ -904,30 +1108,25 @@ function displayQuizResult() {
 
   container.innerHTML = `
     <div class="quiz-progress">Hoàn thành</div>
-    <div class="quiz-question" style="font-size: 1.2rem; text-align: center; margin: 15px 0;">Kết quả luyện tập trắc nghiệm</div>
+    <div class="quiz-question" style="font-size: 1.2rem; text-align: center; margin: 15px 0;">Kết quả: ${pack.title}</div>
     <div style="font-size: 2.2rem; font-weight: 800; color: var(--accent-teal); text-align: center; margin: 15px 0;">
-      ${quizScore} / ${quizData.length}
+      ${quizScore} / ${pack.questions.length}
     </div>
-    <p style="text-align: center; color: var(--text-secondary); margin-bottom: 25px; font-weight: 500;">${rating}</p>
-    <button class="action-btn" onclick="restartQuiz()">Luyện tập lại</button>
+    <p style="text-align: center; color: var(--text-secondary); margin-bottom: 25px; font-weight: 500; padding: 0 10px;">${rating}</p>
+    <div style="display: flex; gap: 10px; width: 100%;">
+      <button class="action-btn secondary" onclick="restartQuiz()" style="flex:1;">Luyện lại</button>
+      <button class="action-btn" onclick="backToPacks()" style="flex:1; background: var(--accent-teal);">Đề thi khác</button>
+    </div>
   `;
 }
 
 function restartQuiz() {
-  currentQuizIndex = 0;
-  quizScore = 0;
-  
-  // Reconstruct quiz HTML structure
-  const container = document.getElementById('quiz-container');
-  container.innerHTML = `
-    <div class="quiz-progress" id="quiz-progress">Câu hỏi 1/5</div>
-    <div class="quiz-question" id="quiz-question">Đang tải câu hỏi...</div>
-    <div class="quiz-options" id="quiz-options"></div>
-    <div class="quiz-explanation" id="quiz-explanation"></div>
-    <button class="action-btn" id="quiz-next-btn" style="display: none;" onclick="nextQuizQuestion()">Câu tiếp theo</button>
-  `;
-  
-  loadQuizQuestion();
+  selectQuizPack(currentPackId);
+}
+
+function backToPacks() {
+  currentPackId = '';
+  displayQuizPacks();
 }
 
 /* ==========================================================================
