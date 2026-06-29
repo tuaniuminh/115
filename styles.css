@@ -1178,7 +1178,7 @@ h1, h2, h3, h4, h5, h6 {
   justify-content: center;
   gap: 5px;
   cursor: pointer;
-  width: 25%;
+  width: 33.33%;
   height: 100%;
   transition: var(--transition-fast);
   position: relative;
@@ -1262,3 +1262,63 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: 0 0 40px rgba(0,0,0,0.5);
   }
 }
+
+/* ==========================================================================
+   THEORY ACCORDION COLLAPSIBLE STYLES (v2.1)
+   ========================================================================== */
+
+.theory-section-card {
+  padding: 0 !important; /* Overwrite container padding so details fills it */
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
+}
+
+.theory-details {
+  width: 100%;
+}
+
+.theory-summary {
+  padding: 16px 20px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  cursor: pointer;
+  list-style: none; /* Hide default browser triangle */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+  outline: none;
+  transition: background-color var(--transition-fast);
+}
+
+.theory-summary::-webkit-details-marker {
+  display: none; /* Hide default Safari triangle */
+}
+
+.theory-summary:hover {
+  background-color: rgba(30, 41, 59, 0.4);
+}
+
+.theory-summary-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.theory-summary-arrow {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  transition: transform var(--transition-normal);
+}
+
+.theory-details[open] .theory-summary-arrow {
+  transform: rotate(180deg);
+}
+
+.theory-details-content {
+  padding: 0 20px 20px 20px;
+  border-top: 1px solid var(--border-color);
+  animation: fadeIn var(--transition-normal);
+}
+

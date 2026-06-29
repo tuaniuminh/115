@@ -238,90 +238,13 @@
       </div>
     </section>
 
-    <!-- ============================================== -->
-    <!-- TAB 4: THÔNG TIN (INFO & PROFILE) -->
-    <!-- ============================================== -->
-    <section id="tab-info" class="tab-content">
-      
-      <!-- Quick Call Emergency Numbers -->
-      <div class="info-section">
-        <h3>Điện Thoại Cấp Cứu Việt Nam</h3>
-        <div class="hotline-grid">
-          <a href="tel:115" class="hotline-card red-glow">
-            <span class="hotline-number">115</span>
-            <span class="hotline-name">Cấp cứu Y tế</span>
-          </a>
-          <a href="tel:114" class="hotline-card">
-            <span class="hotline-number">114</span>
-            <span class="hotline-name">Cứu hộ, Cứu nạn</span>
-          </a>
-          <a href="tel:113" class="hotline-card">
-            <span class="hotline-number">113</span>
-            <span class="hotline-name">Cảnh sát phản ứng nhanh</span>
-          </a>
-        </div>
+    <!-- App Footer with Interactive Version Control (Now scrolls naturally inside app-container) -->
+    <footer class="app-footer">
+      <p>Sơ Cứu 115 &copy; 2026. Vì một cộng đồng an toàn.</p>
+      <div class="version-clicker" id="version-btn" onclick="checkAppUpdate()">
+        Phiên bản: <span class="version-number" id="version-display">2.0.0</span>
       </div>
-
-      <!-- Medical Card Form -->
-      <div class="info-section">
-        <h3>Hồ Sơ Sức Khỏe Cá Nhân (Lưu trữ cục bộ)</h3>
-        <p class="section-desc">Thông tin này được lưu cục bộ trên điện thoại của bạn, giúp nhân viên y tế tra cứu nhanh khi gặp tai nạn.</p>
-        
-        <form class="medical-form" id="medical-form" onsubmit="saveMedicalInfo(event)">
-          <div class="form-group">
-            <label for="med-name">Họ và tên</label>
-            <input type="text" id="med-name" placeholder="Nguyễn Văn A">
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="med-blood">Nhóm máu</label>
-              <select id="med-blood">
-                <option value="">Chưa xác định</option>
-                <option value="A+">A+</option>
-                <option value="A-">A-</option>
-                <option value="B+">B+</option>
-                <option value="B-">B-</option>
-                <option value="O+">O+</option>
-                <option value="O-">O-</option>
-                <option value="AB+">AB+</option>
-                <option value="AB-">AB-</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="med-birth">Năm sinh</label>
-              <input type="number" id="med-birth" placeholder="1990" min="1900" max="2026">
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="med-conditions">Bệnh nền (Nếu có)</label>
-            <input type="text" id="med-conditions" placeholder="Tiểu đường, Tim mạch, Huyết áp cao...">
-          </div>
-
-          <div class="form-group">
-            <label for="med-allergies">Dị ứng (Thuốc, thức ăn, côn trùng)</label>
-            <input type="text" id="med-allergies" placeholder="Penicillin, hải sản, nọc ong...">
-          </div>
-
-          <div class="form-group">
-            <label for="med-contact">Người liên hệ khẩn cấp (Tên & SĐT)</label>
-            <input type="text" id="med-contact" placeholder="Mẹ - 090xxxxxxx">
-          </div>
-
-          <button type="submit" class="action-btn">Lưu thông tin hồ sơ</button>
-          <div id="form-feedback" class="form-feedback"></div>
-        </form>
-      </div>
-
-      <!-- About section -->
-      <div class="info-section about-card">
-        <h3>Về Ứng Dụng Sơ Cứu 115</h3>
-        <p>Ứng dụng được thiết kế nhằm giúp mọi người trang bị kỹ năng tự cứu mình và người khác trước khi nhân viên y tế đến hiện trường. Các dữ liệu hướng dẫn và bài trắc nghiệm được biên soạn khách quan, cô đọng nhất.</p>
-        <p class="disclaimer">⚠️ <strong>Tuyên bố miễn trừ trách nhiệm:</strong> Ứng dụng này cung cấp thông tin sơ cứu mang tính giáo dục và tham khảo. Khi gặp tai nạn nguy kịch, hãy luôn gọi 115 trước tiên.</p>
-      </div>
-
-    </section>
+    </footer>
 
   </main>
 
@@ -347,7 +270,7 @@
 
     <!-- Stepper Audio/CPR control panel (only visible for Cardiac Arrest) -->
     <div class="stepper-special-controls" id="stepper-special-controls">
-      <button class="cpr-sound-trigger" id="stepper-cpr-sound-btn">🔊 Bật nhịp ép tim chuẩn (104 BPM)</button>
+      <button class="cpr-sound-trigger" id="stepper-cpr-sound-btn">🔊 Bật nhịp ép tim chuẩn (110 BPM)</button>
       <div class="cpr-visual-pulse-indicator" id="stepper-pulse-indicator"></div>
     </div>
 
@@ -362,15 +285,7 @@
     <span class="toast-msg" id="toast-msg">Đang kiểm tra cập nhật...</span>
   </div>
 
-  <!-- App Footer with Interactive Version Control -->
-  <footer class="app-footer">
-    <p>Sơ Cứu 115 &copy; 2026. Vì một cộng đồng an toàn.</p>
-    <div class="version-clicker" id="version-btn" onclick="checkAppUpdate()">
-      Phiên bản: <span class="version-number" id="version-display">1.0.0</span>
-    </div>
-  </footer>
-
-  <!-- Sticky Bottom Navigation Bar -->
+  <!-- Sticky Bottom Navigation Bar (3 tabs: Khẩn Cấp, Lý Thuyết, Thực Hành) -->
   <nav class="bottom-nav">
     <button class="nav-item active" data-tab="tab-emergency">
       <svg class="nav-icon" viewBox="0 0 24 24" width="24" height="24">
@@ -392,13 +307,6 @@
         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.53c-.26-.81-1-1.4-1.9-1.4h-1v-3c0-.55-.45-1-1-1h-6v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" fill="currentColor"/>
       </svg>
       <span>Thực Hành</span>
-    </button>
-
-    <button class="nav-item" data-tab="tab-info">
-      <svg class="nav-icon" viewBox="0 0 24 24" width="24" height="24">
-        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" fill="currentColor"/>
-      </svg>
-      <span>Thông Tin</span>
     </button>
   </nav>
 

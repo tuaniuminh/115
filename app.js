@@ -1,8 +1,24 @@
 /* ==========================================================================
-   APPLICATION LOGIC - SƠ CỨU 115 PWA (v2.0.0)
+   APPLICATION LOGIC - SƠ CỨU 115 PWA (v2.1)
    ========================================================================== */
 
 const APP_VERSION = '2.0.0';
+
+// Chặn Pinch-to-zoom và Double-tap-to-zoom để tối ưu nhấn màn hình tốc độ cao
+document.addEventListener('touchstart', function (event) {
+  if (event.touches.length > 1) {
+    event.preventDefault();
+  }
+}, { passive: false });
+
+let lastTouchEnd = 0;
+document.addEventListener('touchend', function (event) {
+  const now = Date.now();
+  if (now - lastTouchEnd <= 300) {
+    event.preventDefault();
+  }
+  lastTouchEnd = now;
+}, false);
 
 // Global Audio Context for Metronome (Used only in Stepper Overlay)
 let audioCtx = null;
@@ -18,6 +34,67 @@ let quizAnswered = false;
 // Stepper Overlay variables
 let currentEmergencyId = '';
 let currentStepIndex = 0;
+
+/* ==========================================================================
+   DATABASE: QUIZ DATA
+   ========================================================================== */
+const quizData = [
+  {
+    question: "Bạn phát hiện một người nằm bất động trên đường. Việc đầu tiên bạn cần làm theo đúng quy trình sơ cứu là gì?",
+    options: [
+      "Lập tức quỳ xuống ép tim CPR cho nạn nhân ngay.",
+      "Lay vai nạn nhân hỏi lớn và kiểm tra an toàn hiện trường xung quanh trước khi tiếp cận.",
+      "Đổ nước ấm vào miệng nạn nhân để kích thích tỉnh táo.",
+      "Cõng nạn nhân chạy đi tìm bệnh viện gần nhất."
+    ],
+    answer: 1,
+    explanation: "Đảm bảo an toàn hiện trường là nguyên tắc sống còn số 1 để tránh bạn cũng trở thành nạn nhân thứ hai (như điện giật, xe tông). Sau đó mới kiểm tra phản ứng của nạn nhân."
+  },
+  {
+    question: "Một người lớn đang ăn bỗng nhiên ôm cổ họng, mặt tím tái, không thể ho, nói hay thở được. Bạn nên thực hiện hành động nào?",
+    options: [
+      "Dùng tay thọc sâu vào cổ họng để móc dị vật ra.",
+      "Bắt nạn nhân uống thật nhiều nước để trôi dị vật xuống dạ dày.",
+      "Đứng sau lưng thực hiện thủ thuật Heimlich (giật bụng mạnh hướng vào trong và lên trên).",
+      "Cho nạn nhân nằm ngửa rồi đè lên bụng họ."
+    ],
+    answer: 2,
+    explanation: "Nạn nhân có dấu hiệu hóc dị vật hoàn toàn đường thở. Việc giật bụng bằng thủ thuật Heimlich tạo ra áp lực khí từ phổi đẩy ngược lên để tống dị vật ra ngoài. Móc tay mò mẫm có thể đẩy dị vật sâu hơn."
+  },
+  {
+    question: "Vị trí đặt tay chính xác khi ép tim ngoài lồng ngực (CPR) cho người lớn là ở đâu?",
+    options: [
+      "Phía trên vùng ngực trái ngay sát tim.",
+      "Nửa dưới của xương ức (khoảng giữa hai núm vú trên ngực).",
+      "Vùng bụng trên rốn.",
+      "Trên xương đòn vai trái."
+    ],
+    answer: 1,
+    explanation: "Ép vào nửa dưới xương ức giúp ép trực tiếp quả tim nằm bên dưới lồng ngực vào cột sống, tạo ra lực đẩy máu tuần hoàn đi nuôi cơ thể. Ép lệch sang ngực trái có thể làm gãy xương sườn."
+  },
+  {
+    question: "Khi sơ cứu một vết bỏng nước sôi tại nhà, điều nào sau đây là SAI và NGUY HIỂM?",
+    options: [
+      "Xả nước mát sạch chảy nhẹ lên vết bỏng 15-20 phút.",
+      "Bôi kem đánh răng hoặc mỡ trăn trực tiếp lên vết bỏng để làm dịu da.",
+      "Cởi bỏ trang sức nhẹ nhàng ở chi bị bỏng trước khi nó sưng nề.",
+      "Bọc lỏng vết bỏng bằng màng bọc thực phẩm sạch."
+    ],
+    answer: 1,
+    explanation: "Bôi kem đánh răng, mỡ trăn hay dầu hỏa làm bịt kín nhiệt lượng dưới da, giữ vi khuẩn lại gây nhiễm trùng nghiêm trọng và làm vết bỏng ăn sâu thêm."
+  },
+  {
+    question: "Một người đột nhiên bị méo miệng sang một bên, yếu liệt một bên cánh tay và nói ngọng ú ớ. Bạn cần làm gì?",
+    options: [
+      "Cho nằm nghỉ ngơi và cạo gió, chích máu đầu ngón tay.",
+      "Cho uống ngay một viên thuốc An Cung Ngưu Hoàng Hoàn.",
+      "Lập tức gọi cấp cứu 115 và ghi nhớ mốc thời gian xuất hiện triệu chứng.",
+      "Bắt nạn nhân đứng dậy đi bộ xem có giữ thăng bằng được không."
+    ],
+    answer: 2,
+    explanation: "Nạn nhân có triệu chứng đột quỵ chuẩn FAST. Thời gian là não. Cần gọi 115 đưa đến cơ sở y tế có điều trị tái thông cấp tốc. Tuyệt đối không cho uống thuốc/ăn uống vì nguy cơ sặc phổi rất cao."
+  }
+];
 
 /* ==========================================================================
    DATABASE: DETAILED CLINICAL EMERGENCY GUIDES (8 SITUATIONS)
@@ -202,7 +279,7 @@ const emergencyData = {
         imagePath: "./assets/drowning.png"
       },
       {
-        title: "Tiến hành hồi sức CPR 30:2",
+        title: "Thực hiện hồi sức CPR 30:2",
         desc: "Nếu ngực không nhô lên và không có dấu hiệu thở, thực hiện ngay chu kỳ ép tim và thổi ngạt: <strong>30 lần ép tim, 2 lần thổi ngạt</strong>. Kiên trì thực hiện liên tục.",
         imagePath: "./assets/cpr.png"
       },
@@ -213,7 +290,7 @@ const emergencyData = {
       }
     ],
     theory: {
-      physiology: "Đuối nước là tình trạng suy hô hấp do bị chìm trong chất lỏng. Khi chìm, phản xạ đầu tiên là nín thở, sau đó luồng co thắt thanh quản mạnh mẽ xuất hiện. Khi nồng độ oxy giảm sâu, phản xạ hít vào cưỡng bức buộc nước tràn vào đường thở. Nước xâm nhập vào phế nang phá hủy chất surfactant (chất hoạt diện bảo vệ phổi), làm xẹp phổi, rách màng phế nang mao mạch gây phù phổi cấp tính. Thiếu oxy nghiêm trọng dẫn đến ngừng tim trong vài phút. Việc cấp cứu thổi ngạt ngay lập tức khi đưa lên bờ là mấu chốt sống còn để đưa oxy tái thông phế quản phổi.",
+      physiology: "Đuối nước là tình trạng suy hô hấp do bị chìm trong chất lỏng. Khi chìm, phản xạ đầu tiên là nín thở, sau đó luồng co thắt thanh quan mạnh mẽ xuất hiện. Khi nồng độ oxy giảm sâu, phản xạ hít vào cưỡng bức buộc nước tràn vào đường thở. Nước xâm nhập vào phế nang phá hủy chất surfactant (chất hoạt diện bảo vệ phổi), làm xẹp phổi, rách màng phế nang mao mạch gây phù phổi cấp tính. Thiếu oxy nghiêm trọng dẫn đến ngừng tim trong vài phút. Việc cấp cứu thổi ngạt ngay lập tức khi đưa lên bờ là mấu chốt sống còn để đưa oxy tái thông phế quản phổi.",
       symptoms: [
         "Nạn nhân sặc sụa, khó thở dữ dội, tím tái môi và toàn thân.",
         "Miệng và mũi sùi bọt hồng (dấu hiệu của phù phổi cấp do nước vào nang phổi).",
@@ -228,7 +305,7 @@ const emergencyData = {
         "Ủ ấm cơ thể bằng chăn sấy khô, xoa bóp nhẹ để kích thích tuần hoàn ngoại biên."
       ],
       donts: [
-        "KHÔNG thực hiện động tác 'xốc nước' (vác ngược nạn nhân chạy vòng quanh). Đây là hành động phản khoa học và cực kỳ nguy hiểm. Lượng nước đi vào phổi thực chất rất ít và bị màng phế nang giữ lại, không thể dốc ra ngoài theo trọng lực. Việc xốc nước làm mất đi 'thời gian vàng' cấp cứu thổi ngạt cứu não, đồng thời làm tăng nguy cơ trào ngược dịch dạ dày ngược vào đường thở gây tắc nghẽn phổi hoàn toàn, hoặc làm chấn thương cột sống cổ nặng thêm."
+        "KHÔNG thực hiện động tác 'xốc nước' (vác ngược nạn nhân chạy ngược). Đây là hành động phản khoa học và cực kỳ nguy hiểm. Lượng nước đi vào phổi thực chất rất ít và bị màng phế nang giữ lại, không thể dốc ra ngoài theo trọng lực. Việc xốc nước làm mất đi 'thời gian vàng' cấp cứu thổi ngạt cứu não, đồng thời làm tăng nguy cơ trào ngược dịch dạ dày ngược vào đường thở gây tắc nghẽn phổi hoàn toàn, hoặc làm chấn thương cột sống cổ nặng thêm."
       ]
     }
   },
@@ -274,11 +351,11 @@ const emergencyData = {
       actions: [
         "Gọi cấp cứu 115 ngay lập tức. Nêu rõ nghi ngờ đột quỵ và thời gian bắt đầu bị.",
         "Đặt nạn nhân nằm đầu cao 30 độ, nới lỏng khuy áo ở cổ, thắt lưng để hỗ trợ thở.",
-        "Nếu nạn nhân có hiện tượng trào ngược dịch nôn hoặc lơ mơ, đặt nằm nghiêng an toàn để thông đường thở.",
+        "If nạn nhân có hiện tượng trào ngược dịch nôn hoặc lơ mơ, đặt nằm nghiêng an toàn để thông đường thở.",
         "Theo dõi nhịp thở của nạn nhân chặt chẽ. Nếu ngưng thở, tiến hành CPR ngay."
       ],
       donts: [
-        "KHÔNG tự ý cho nạn nhân ăn, uống nước, hoặc uống bất kỳ loại thuốc nào (như aspirin, thuốc hạ huyết áp, hay An Cung Ngưu Hoàng Hoàn). Đột quỵ làm liệt cơ hầu họng, nuốt sặc là phản ứng tự nhiên khiến thức ăn/thuốc chui thẳng vào đường thở gây tắc nghẽn phổi, dẫn đến suy hô hấp cấp tử vong lập tức.",
+        "KHÔNG tự ý cho nạn nhân ăn, uống nước, hoặc uống bất kỳ loại thuốc nào (kể cả thuốc hạ huyết áp hay An Cung). Đột quỵ làm liệt cơ hầu họng, nuốt sặc là phản ứng tự nhiên khiến thức ăn/thuốc chui thẳng vào đường thở gây tắc nghẽn phổi, dẫn đến suy hô hấp cấp tử vong lập tức.",
         "KHÔNG thực hiện cạo gió, giật tóc mai, châm cứu hay chích máu đầu ngón tay. Những biện pháp dân gian này không có tác dụng làm tan cục máu đông hay cầm máu não, ngược lại gây đau đớn làm huyết áp nạn nhân vọt tăng cao (khiến xuất huyết não nặng thêm) và làm mất đi thời gian vàng đưa nạn nhân đến bệnh viện."
       ]
     }
@@ -470,9 +547,6 @@ window.addEventListener('load', () => {
   updateOnlineStatus();
   window.addEventListener('online', updateOnlineStatus);
   window.addEventListener('offline', updateOnlineStatus);
-
-  // Initialize medical records form from localStorage
-  loadMedicalInfo();
 
   // Initialize Tab Switch Navigation
   const navItems = document.querySelectorAll('.bottom-nav .nav-item');
@@ -857,7 +931,7 @@ function restartQuiz() {
 }
 
 /* ==========================================================================
-   TAB 2: THEORY DYNAMIC LIBRARY & FILTER
+   TAB 2: THEORY DYNAMIC LIBRARY & COLLAPSIBLE ACCORDIONS (v2.1)
    ========================================================================== */
 function generateTheoryLibrary() {
   const listEl = document.getElementById('theory-list');
@@ -866,44 +940,52 @@ function generateTheoryLibrary() {
   listEl.innerHTML = '';
   
   for (const [key, data] of Object.entries(emergencyData)) {
-    const card = document.createElement('article');
+    const card = document.createElement('div');
     card.className = 'theory-section-card';
     card.setAttribute('data-id', key);
 
     card.innerHTML = `
-      <h2>
-        <span style="font-size:1.6rem; line-height:1;">🩺</span>
-        ${data.title}
-      </h2>
-      <div class="theory-svg-box">
-        <img src="${data.imagePath}" alt="${data.title}">
-      </div>
-      
-      <div class="theory-block physiology-block" style="background-color: rgba(59, 130, 246, 0.04); border-left: 4px solid var(--accent-blue); padding: 12px 14px; border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0; margin-bottom: 15px; text-align: left;">
-        <h4 style="color: var(--accent-blue);">🔬 Cơ chế sinh lý học & Nguyên nhân</h4>
-        <p style="font-size: 0.88rem; color: var(--text-secondary); margin-top: 5px; line-height: 1.6;">${data.theory.physiology}</p>
-      </div>
+      <details class="theory-details">
+        <summary class="theory-summary">
+          <span class="theory-summary-title">
+            <span style="font-size:1.4rem; line-height:1;">🩺</span>
+            ${data.title}
+          </span>
+          <span class="theory-summary-arrow">▼</span>
+        </summary>
+        
+        <div class="theory-details-content">
+          <div class="theory-svg-box" style="margin-top: 15px;">
+            <img src="${data.imagePath}" alt="${data.title}">
+          </div>
+          
+          <div class="theory-block physiology-block" style="background-color: rgba(59, 130, 246, 0.04); border-left: 4px solid var(--accent-blue); padding: 12px 14px; border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0; margin-bottom: 15px; text-align: left;">
+            <h4 style="color: var(--accent-blue); font-size: 0.95rem; font-weight:700;">🔬 Cơ chế sinh lý học & Nguyên nhân</h4>
+            <p style="font-size: 0.88rem; color: var(--text-secondary); margin-top: 5px; line-height: 1.6;">${data.theory.physiology}</p>
+          </div>
 
-      <div class="theory-block symptoms-block" style="background-color: rgba(245, 158, 11, 0.04); border-left: 4px solid var(--accent-amber); padding: 12px 14px; border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0; margin-bottom: 15px; text-align: left;">
-        <h4 style="color: var(--accent-amber);">⚠️ Triệu chứng & Dấu hiệu nhận biết</h4>
-        <ul style="margin-top: 5px; padding-left: 15px; list-style-type: disc;">
-          ${data.theory.symptoms.map(symptom => `<li style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 4px;">${symptom}</li>`).join('')}
-        </ul>
-      </div>
-      
-      <div class="theory-block dos" style="text-align: left;">
-        <h4>✓ Hướng dẫn xử lý sơ cứu chi tiết</h4>
-        <ul>
-          ${data.theory.actions.map(action => `<li>${action}</li>`).join('')}
-        </ul>
-      </div>
+          <div class="theory-block symptoms-block" style="background-color: rgba(245, 158, 11, 0.04); border-left: 4px solid var(--accent-amber); padding: 12px 14px; border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0; margin-bottom: 15px; text-align: left;">
+            <h4 style="color: var(--accent-amber); font-size: 0.95rem; font-weight:700;">⚠️ Triệu chứng & Dấu hiệu nhận biết</h4>
+            <ul style="margin-top: 5px; padding-left: 15px; list-style-type: disc;">
+              ${data.theory.symptoms.map(symptom => `<li style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 4px;">${symptom}</li>`).join('')}
+            </ul>
+          </div>
+          
+          <div class="theory-block dos" style="text-align: left;">
+            <h4>✓ Hướng dẫn xử lý sơ cứu chi tiết</h4>
+            <ul>
+              ${data.theory.actions.map(action => `<li>${action}</li>`).join('')}
+            </ul>
+          </div>
 
-      <div class="theory-block donts" style="text-align: left;">
-        <h4>✕ Hành động cấm kỵ tuyệt đối tránh</h4>
-        <ul>
-          ${data.theory.donts.map(dont => `<li>${dont}</li>`).join('')}
-        </ul>
-      </div>
+          <div class="theory-block donts" style="text-align: left;">
+            <h4>✕ Hành động cấm kỵ tuyệt đối tránh</h4>
+            <ul>
+              ${data.theory.donts.map(dont => `<li>${dont}</li>`).join('')}
+            </ul>
+          </div>
+        </div>
+      </details>
     `;
 
     listEl.appendChild(card);
@@ -922,11 +1004,22 @@ function filterTheory() {
   }
 
   cards.forEach(card => {
-    const text = card.textContent.toLowerCase();
-    if (text.includes(query)) {
+    // For accordions, search in title or inner content
+    const details = card.querySelector('.theory-details');
+    const titleText = card.querySelector('.theory-summary-title').textContent.toLowerCase();
+    const contentText = card.querySelector('.theory-details-content').textContent.toLowerCase();
+    
+    if (titleText.includes(query) || contentText.includes(query)) {
       card.style.display = 'block';
+      // Automatically expand card if it matches search query
+      if (query.length > 0) {
+        details.open = true;
+      } else {
+        details.open = false; // collapse on empty search
+      }
     } else {
       card.style.display = 'none';
+      details.open = false;
     }
   });
 }
@@ -938,50 +1031,7 @@ function clearSearch() {
 }
 
 /* ==========================================================================
-   TAB 4: PERSONAL MEDICAL CARD (LOCAL STORAGE)
-   ========================================================================== */
-function saveMedicalInfo(event) {
-  event.preventDefault();
-
-  const profile = {
-    name: document.getElementById('med-name').value.trim(),
-    blood: document.getElementById('med-blood').value,
-    birth: document.getElementById('med-birth').value,
-    conditions: document.getElementById('med-conditions').value.trim(),
-    allergies: document.getElementById('med-allergies').value.trim(),
-    contact: document.getElementById('med-contact').value.trim()
-  };
-
-  localStorage.setItem('med_profile_115', JSON.stringify(profile));
-  
-  const feedback = document.getElementById('form-feedback');
-  feedback.textContent = "Hồ sơ y tế của bạn đã được lưu thành công! ✓";
-  
-  setTimeout(() => {
-    feedback.textContent = "";
-  }, 3000);
-}
-
-function loadMedicalInfo() {
-  const saved = localStorage.getItem('med_profile_115');
-  if (!saved) return;
-
-  try {
-    const profile = JSON.parse(saved);
-    
-    document.getElementById('med-name').value = profile.name || '';
-    document.getElementById('med-blood').value = profile.blood || '';
-    document.getElementById('med-birth').value = profile.birth || '';
-    document.getElementById('med-conditions').value = profile.conditions || '';
-    document.getElementById('med-allergies').value = profile.allergies || '';
-    document.getElementById('med-contact').value = profile.contact || '';
-  } catch (e) {
-    console.error("Error loading medical profile:", e);
-  }
-}
-
-/* ==========================================================================
-   PWA FORCE UPDATE MECHANISM
+   PWA FORCE UPDATE & NETWORK STATUS
    ========================================================================== */
 function showToast(message, duration = 3000) {
   const toast = document.getElementById('toast-notification');
@@ -997,13 +1047,27 @@ function showToast(message, duration = 3000) {
   }
 }
 
+function updateOnlineStatus() {
+  const badge = document.getElementById('offline-badge');
+  if (badge) {
+    if (navigator.onLine) {
+      badge.textContent = "Trực Tuyến";
+      badge.classList.remove('offline');
+      badge.style.backgroundColor = "var(--accent-teal)";
+    } else {
+      badge.textContent = "Ngoại Tuyến (Offline)";
+      badge.classList.add('offline');
+      badge.style.backgroundColor = "var(--text-muted)";
+    }
+  }
+}
+
 function checkAppUpdate() {
   showToast('Đang kiểm tra bản cập nhật mới nhất...', 2500);
 
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.ready
       .then(reg => {
-        // Trigger manual check on service worker file
         reg.update()
           .then(updatedReg => {
             if (updatedReg && updatedReg.installing) {
@@ -1015,7 +1079,6 @@ function checkAppUpdate() {
                 window.location.reload();
               }, 1200);
             } else {
-              // Wait 1.5s then show status
               setTimeout(() => {
                 showToast(`Bạn đang sử dụng bản mới nhất v${APP_VERSION} ✓`, 3000);
               }, 1200);

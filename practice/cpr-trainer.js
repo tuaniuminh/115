@@ -2,6 +2,22 @@
    CPR TRAINER LOGIC - SEPARATE COMPONENT (110 BPM, 30:2 CYCLE)
    ========================================================================== */
 
+// Chặn Pinch-to-zoom và Double-tap-to-zoom để tối ưu nhấn màn hình tốc độ cao
+document.addEventListener('touchstart', function (event) {
+  if (event.touches.length > 1) {
+    event.preventDefault();
+  }
+}, { passive: false });
+
+let lastTouchEnd = 0;
+document.addEventListener('touchend', function (event) {
+  const now = Date.now();
+  if (now - lastTouchEnd <= 300) {
+    event.preventDefault();
+  }
+  lastTouchEnd = now;
+}, false);
+
 let audioCtx = null;
 let metronomeTimer = null;
 let breathTimerInterval = null;
