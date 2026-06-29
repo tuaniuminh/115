@@ -1,8 +1,8 @@
 /* ==========================================================================
-   APPLICATION LOGIC - SƠ CỨU 115 PWA (v2.2)
+   APPLICATION LOGIC - SƠ CỨU 115 PWA (v2.3)
    ========================================================================== */
 
-const APP_VERSION = '2.2.0';
+const APP_VERSION = '2.3.0';
 
 // Chặn Pinch-to-zoom và Double-tap-to-zoom để tối ưu nhấn màn hình tốc độ cao
 document.addEventListener('touchstart', function (event) {
@@ -705,10 +705,7 @@ window.addEventListener('load', () => {
       });
   }
 
-  // Set initial online/offline status
-  updateOnlineStatus();
-  window.addEventListener('online', updateOnlineStatus);
-  window.addEventListener('offline', updateOnlineStatus);
+
 
   // Initialize Tab Switch Navigation
   const navItems = document.querySelectorAll('.bottom-nav .nav-item');
@@ -743,9 +740,9 @@ window.addEventListener('load', () => {
   loadQuizQuestion();
 
   // Display version Display from constants
-  const versionDisplay = document.getElementById('version-display');
+  const versionDisplay = document.getElementById('version-badge');
   if (versionDisplay) {
-    versionDisplay.textContent = APP_VERSION;
+    versionDisplay.textContent = `VER ${APP_VERSION} PRO`;
   }
 });
 
@@ -777,20 +774,7 @@ function switchTab(tabId) {
   stopMetronome();
 }
 
-function updateOnlineStatus() {
-  const badge = document.getElementById('offline-badge');
-  if (badge) {
-    if (navigator.onLine) {
-      badge.textContent = "Trực Tuyến";
-      badge.classList.remove('offline');
-      badge.style.backgroundColor = "var(--accent-teal)";
-    } else {
-      badge.textContent = "Ngoại Tuyến (Offline)";
-      badge.classList.add('offline');
-      badge.style.backgroundColor = "var(--text-muted)";
-    }
-  }
-}
+
 
 /* ==========================================================================
    EMERGENCY FILTER LOGIC
@@ -1246,20 +1230,7 @@ function showToast(message, duration = 3000) {
   }
 }
 
-function updateOnlineStatus() {
-  const badge = document.getElementById('offline-badge');
-  if (badge) {
-    if (navigator.onLine) {
-      badge.textContent = "Trực Tuyến";
-      badge.classList.remove('offline');
-      badge.style.backgroundColor = "var(--accent-teal)";
-    } else {
-      badge.textContent = "Ngoại Tuyến (Offline)";
-      badge.classList.add('offline');
-      badge.style.backgroundColor = "var(--text-muted)";
-    }
-  }
-}
+
 
 function checkAppUpdate() {
   showToast('Đang kiểm tra bản cập nhật mới nhất...', 2500);

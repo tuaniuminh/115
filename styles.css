@@ -123,19 +123,22 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .status-badge {
-  font-size: 0.75rem;
+  font-size: 0.68rem;
   font-weight: 700;
-  padding: 4px 10px;
+  padding: 4px 12px;
   border-radius: 20px;
-  background-color: var(--accent-teal);
-  color: #fff;
+  background: linear-gradient(135deg, var(--accent-teal), #0d9488);
+  color: var(--bg-primary) !important;
   transition: var(--transition-fast);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(20, 184, 166, 0.2);
 }
 
-.status-badge.offline {
-  background-color: var(--text-muted);
+.status-badge:hover {
+  transform: scale(1.04);
+  box-shadow: 0 0 15px rgba(20, 184, 166, 0.4);
 }
 
 /* Main Content Area */
@@ -1080,39 +1083,7 @@ h1, h2, h3, h4, h5, h6 {
    APP FOOTER & VERSION CLICKER
    ========================================================================== */
 
-.app-footer {
-  text-align: center;
-  padding: 20px 10px 10px 10px;
-  margin-top: 40px;
-  margin-bottom: 0;
-  font-size: 0.72rem;
-  color: var(--text-muted);
-  border-top: 1px solid rgba(255, 255, 255, 0.04);
-}
 
-.app-footer p {
-  margin-bottom: 5px;
-}
-
-.version-clicker {
-  display: inline-block;
-  background-color: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  padding: 2px 8px;
-  cursor: pointer;
-  transition: var(--transition-fast);
-  user-select: none;
-}
-
-.version-clicker:hover {
-  border-color: var(--border-focus);
-  color: var(--text-primary);
-}
-
-.version-clicker:active {
-  transform: scale(0.95);
-}
 
 .version-number {
   font-weight: 600;
